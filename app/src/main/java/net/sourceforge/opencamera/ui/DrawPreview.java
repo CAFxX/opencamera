@@ -890,9 +890,6 @@ public class DrawPreview {
         if( preview.isVideo() || preview_size_wysiwyg_pref ) {
             String preference_crop_guide = sharedPreferences.getString(PreferenceKeys.ShowCropGuidePreferenceKey, "crop_guide_none");
             if( camera_controller != null && preview.getTargetRatio() > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {
-                p.setStyle(Paint.Style.STROKE);
-                p.setStrokeWidth(stroke_width);
-                p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
                 double crop_ratio = -1.0;
                 switch(preference_crop_guide) {
                     case "crop_guide_1":
@@ -939,22 +936,35 @@ public class DrawPreview {
 		    			Log.d(TAG, "canvas width: " + canvas.getWidth());
 		    			Log.d(TAG, "canvas height: " + canvas.getHeight());
 		    		}*/
+
+                    p.setStyle(Paint.Style.FILL);
+                    p.setColor(Color.BLACK);
+                    p.setAlpha(170); // 33% transparent
+
                     int left = 1, top = 1, right = canvas.getWidth()-1, bottom = canvas.getHeight()-1;
                     if( crop_ratio > preview.getTargetRatio() ) {
                         // crop ratio is wider, so we have to crop top/bottom
                         double new_hheight = ((double)canvas.getWidth()) / (2.0f*crop_ratio);
                         top = (canvas.getHeight()/2 - (int)new_hheight);
                         bottom = (canvas.getHeight()/2 + (int)new_hheight);
+                        canvas.drawRect(0, 0, canvas.getWidth(), top, p);
+                        canvas.drawRect(0, bottom, canvas.getWidth(), canvas.getHeight(), p);
                     }
                     else {
                         // crop ratio is taller, so we have to crop left/right
                         double new_hwidth = (((double)canvas.getHeight()) * crop_ratio) / 2.0f;
                         left = (canvas.getWidth()/2 - (int)new_hwidth);
                         right = (canvas.getWidth()/2 + (int)new_hwidth);
+                        canvas.drawRect(0, 0, left, canvas.getHeight(), p);
+                        canvas.drawRect(right, 0, canvas.getWidth(), canvas.getHeight(), p);
                     }
+
+                    p.setStyle(Paint.Style.STROKE);
+                    p.setStrokeWidth(stroke_width);
+                    p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
                     canvas.drawRect(left, top, right, bottom, p);
+                    p.setStyle(Paint.Style.FILL); // reset
                 }
-                p.setStyle(Paint.Style.FILL); // reset
             }
         }
     }
